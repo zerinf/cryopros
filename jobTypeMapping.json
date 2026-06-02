@@ -56,15 +56,16 @@
           "properties": {
             "init_volume": {
               "type": "string",
-              "title": "Initial volume"
+              "title": "Initial reference map",
+              "description": "Path to the initial reference map (.mrc or .map) used by CryoPROS Prep."
             },
             "lowpass": {
               "type": [
                 "string",
                 "number"
               ],
-              "title": "Low-pass",
-              "description": "Low-pass value for relion_image_handler."
+              "title": "Low-pass (Å)",
+              "description": "Low-pass resolution in Å for relion_image_handler."
             },
             "isMembraneProtein": {
               "type": "boolean",
@@ -120,19 +121,21 @@
               ],
               "title": "Dataloader batch size"
             },
+            "num_gpus": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "default": "1",
+              "title": "GPUs",
+              "description": "Number of GPUs requested for this single-node Slurm job."
+            },
             "dataloader_num_workers": {
               "type": [
                 "string",
                 "number"
               ],
               "title": "Dataloader workers"
-            },
-            "gpu_ids": {
-              "type": [
-                "string",
-                "number"
-              ],
-              "title": "GPU IDs"
             },
             "lane": {
               "type": "string",
@@ -182,9 +185,6 @@
             },
             "dataloader_num_workers": {
               "when": "isMembraneProtein"
-            },
-            "gpu_ids": {
-              "when": "isMembraneProtein"
             }
           },
           "sections": {
@@ -198,9 +198,9 @@
               "description"
             ],
             "parameters": [
+              "particle_id",
               "init_volume",
               "lowpass",
-              "particle_id",
               "isMembraneProtein",
               "threshold",
               "invert",
@@ -209,8 +209,7 @@
               "Apix",
               "volume_scale",
               "dataloader_batch_size",
-              "dataloader_num_workers",
-              "gpu_ids"
+              "dataloader_num_workers"
             ]
           }
         }
@@ -341,12 +340,6 @@
                     "flag": "--dataloader_num_workers",
                     "from": "spec.dataloader_num_workers",
                     "required": true
-                  },
-                  {
-                    "key": "gpu_ids",
-                    "flag": "--gpu_ids",
-                    "from": "spec.gpu_ids",
-                    "required": true
                   }
                 ]
               }
@@ -472,6 +465,31 @@
               "title": "Dataloader batch size",
               "default": 6
             },
+            "num_epoch": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "title": "Number of epochs",
+              "default": 1
+            },
+            "max_iter": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "title": "Max iterations",
+              "description": "Optional maximum number of training iterations."
+            },
+            "num_gpus": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "default": "1",
+              "title": "GPUs",
+              "description": "Number of GPUs requested for this single-node Slurm job."
+            },
             "lane": {
               "type": "string",
               "title": "Lane",
@@ -519,7 +537,10 @@
               "Apix",
               "invert",
               "task_name",
-              "dataloader_batch_size"
+              "dataloader_batch_size",
+              "num_epoch",
+              "max_iter",
+              "num_gpus"
             ]
           }
         }
@@ -535,6 +556,26 @@
               {
                 "key": "01_train",
                 "execKey": "cryopros-train",
+                "launcher": {
+                  "execKey": "torchrun",
+                  "args": [
+                    {
+                      "literal": "--standalone"
+                    },
+                    {
+                      "literal": "--no_python"
+                    },
+                    {
+                      "literal": "--nnodes=1"
+                    },
+                    {
+                      "literal": "--nproc_per_node"
+                    },
+                    {
+                      "env": "COCO_NPROC_PER_NODE"
+                    }
+                  ]
+                },
                 "args": [
                   {
                     "key": "init_volume_path",
@@ -583,6 +624,18 @@
                     "key": "dataloader_batch_size",
                     "flag": "--dataloader_batch_size",
                     "from": "spec.dataloader_batch_size",
+                    "required": false
+                  },
+                  {
+                    "key": "num_epoch",
+                    "flag": "--num_epoch",
+                    "from": "spec.num_epoch",
+                    "required": false
+                  },
+                  {
+                    "key": "max_iter",
+                    "flag": "--max_iter",
+                    "from": "spec.max_iter",
                     "required": false
                   }
                 ]
@@ -704,10 +757,19 @@
               "title": "Invert",
               "default": true
             },
-            "activationCmd": {
+            "num_gpus": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "default": "1",
+              "title": "GPUs",
+              "description": "Number of GPUs requested for this single-node Slurm job."
+            },
+            "gpu_ids": {
               "type": "string",
-              "title": "Activation command",
-              "description": "Optional command recorded with the job for downstream CryoPROS scripts."
+              "title": "GPU IDs",
+              "description": "Generated by CoCo from the requested GPU count."
             },
             "trained_model_title": {
               "type": "string",
@@ -779,8 +841,7 @@
           "sections": {
             "general": [
               "projectName",
-              "lane",
-              "activationCmd"
+              "lane"
             ],
             "details": [
               "id",
@@ -793,7 +854,8 @@
               "gen_name",
               "box_size",
               "Apix",
-              "invert"
+              "invert",
+              "num_gpus"
             ],
             "cryoSparc": [
               "exportToCryoSPARC",
@@ -866,6 +928,13 @@
                     "flag": "--gen_mode",
                     "from": "payload.gen_mode",
                     "required": true
+                  },
+                  {
+                    "key": "gpu_ids",
+                    "flag": "--gpu_ids",
+                    "from": "spec.gpu_ids",
+                    "required": true,
+                    "multiValue": true
                   }
                 ]
               }
