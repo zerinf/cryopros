@@ -121,6 +121,15 @@
               ],
               "title": "Dataloader batch size"
             },
+            "num_nodes": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "default": "1",
+              "title": "Nodes",
+              "description": "Number of Slurm nodes requested for this job."
+            },
             "num_gpus": {
               "type": [
                 "string",
@@ -209,6 +218,7 @@
               "Apix",
               "volume_scale",
               "dataloader_batch_size",
+              "num_nodes",
               "dataloader_num_workers"
             ]
           }
@@ -481,6 +491,15 @@
               "title": "Max iterations",
               "description": "Optional maximum number of training iterations."
             },
+            "num_nodes": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "default": "1",
+              "title": "Nodes",
+              "description": "Number of Slurm nodes requested for this job."
+            },
             "num_gpus": {
               "type": [
                 "string",
@@ -540,6 +559,7 @@
               "dataloader_batch_size",
               "num_epoch",
               "max_iter",
+              "num_nodes",
               "num_gpus"
             ]
           }
@@ -566,7 +586,10 @@
                       "literal": "--no_python"
                     },
                     {
-                      "literal": "--nnodes=1"
+                      "literal": "--nnodes"
+                    },
+                    {
+                      "env": "COCO_NUM_NODES"
                     },
                     {
                       "literal": "--nproc_per_node"
@@ -757,6 +780,15 @@
               "title": "Invert",
               "default": true
             },
+            "num_nodes": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "default": "1",
+              "title": "Nodes",
+              "description": "Number of Slurm nodes requested for this job."
+            },
             "num_gpus": {
               "type": [
                 "string",
@@ -855,6 +887,7 @@
               "box_size",
               "Apix",
               "invert",
+              "num_nodes",
               "num_gpus"
             ],
             "cryoSparc": [
