@@ -23,7 +23,6 @@ requires:
   optional:
     - cryosparc
 resources:
-  jobTypeMapping: jobTypeMapping.json
   scripts:
     - scripts/export_cryopros.py
 lineage:
