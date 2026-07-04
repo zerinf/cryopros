@@ -18,8 +18,6 @@ provides:
     - particle-prior.trainer
     - particle-selection.producer
 requires:
-  external:
-    - relion
   optional:
     - cryosparc
 resources:
